@@ -11,7 +11,6 @@ import com.osrsdailytasks.notification.TaskCompletionNotifier;
 import com.osrsdailytasks.service.DailyTaskService;
 import com.osrsdailytasks.service.DailyTaskLoadCoordinator;
 import com.osrsdailytasks.tracking.AgilityLapDetector;
-import com.osrsdailytasks.tracking.BossTaskMatcher;
 import com.osrsdailytasks.tracking.BossCompletionDetector;
 import com.osrsdailytasks.tracking.BrimhavenArenaTagDetector;
 import com.osrsdailytasks.tracking.ClueScrollCompletionDetector;
@@ -30,7 +29,6 @@ import net.runelite.api.events.StatChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
-import net.runelite.client.events.NpcLootReceived;
 import net.runelite.client.events.RuneScapeProfileChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -54,9 +52,6 @@ public class OsrsDailyTasksPlugin extends Plugin
 
 	@Inject
 	private TaskProgressService taskProgressService;
-
-	@Inject
-	private BossTaskMatcher bossTaskMatcher;
 
 	@Inject
 	private BossCompletionDetector bossCompletionDetector;
@@ -186,16 +181,6 @@ public class OsrsDailyTasksPlugin extends Plugin
 				BrimhavenArenaTagDetector.SUBJECT_ID,
 				client.getTickCount()));
 		}
-	}
-
-	@Subscribe
-	public void onNpcLootReceived(NpcLootReceived event)
-	{
-		bossTaskMatcher.subjectForNpc(event.getNpc().getId()).ifPresent(subjectId ->
-			handleProgressResult(taskProgressService.recordDiscreteCompletion(
-				TaskType.BOSS,
-				subjectId,
-				client.getTickCount())));
 	}
 
 	@Subscribe

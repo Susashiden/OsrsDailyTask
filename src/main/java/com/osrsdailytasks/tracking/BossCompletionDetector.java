@@ -40,9 +40,6 @@ public class BossCompletionDetector
 		}
 
 		return bossCatalog.findByDisplayName(matcher.group("boss"))
-			// Giant Mole retains its verified loot-event tracker to avoid counting
-			// both a loot event and a kill-count message for the same kill.
-			.filter(boss -> !"GIANT_MOLE".equals(boss.getSubjectId()))
 			.map(boss -> new BossCompletion(
 				boss.getSubjectId(),
 				Integer.parseInt(matcher.group("kc").replace(",", ""))));

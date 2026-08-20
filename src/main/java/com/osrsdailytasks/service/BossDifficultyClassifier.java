@@ -72,11 +72,9 @@ public class BossDifficultyClassifier
 			case DUKE_SUCELLUS:
 			case NEX:
 			case NIGHTMARE:
-			case PHOSANIS_NIGHTMARE:
 			case THE_CORRUPTED_GAUNTLET:
 			case THE_LEVIATHAN:
 			case THE_WHISPERER:
-			case THEATRE_OF_BLOOD:
 			case TOMBS_OF_AMASCUT:
 			case TZTOK_JAD:
 			case VARDORVIS:
@@ -86,8 +84,10 @@ public class BossDifficultyClassifier
 			case CHAMBERS_OF_XERIC_CHALLENGE_MODE:
 			case DOOM_OF_MOKHAIOTL:
 			case SOL_HEREDIT:
+			case THEATRE_OF_BLOOD:
 			case THEATRE_OF_BLOOD_HARD_MODE:
 			case TOMBS_OF_AMASCUT_EXPERT:
+			case PHOSANIS_NIGHTMARE:
 			case TZKAL_ZUK:
 				return Optional.of(PvmDifficulty.ENDGAME);
 

@@ -15,24 +15,17 @@ public class BossCompletionDetectorTest
 	private final BossCompletionDetector detector = new BossCompletionDetector(catalog);
 
 	@Test
-	public void recognizesEveryCatalogDisplayNameExceptLootTrackedGiantMole()
+	public void recognizesEveryCatalogDisplayName()
 	{
 		for (BossDefinition boss : catalog.getDefinitions())
 		{
 			String message = "Your " + boss.getDisplayName()
 				+ " kill count is: <col=ff0000>1</col>";
-			if ("GIANT_MOLE".equals(boss.getSubjectId()))
-			{
-				assertFalse(detector.findCompletion(ChatMessageType.GAMEMESSAGE, message).isPresent());
-			}
-			else
-			{
-				BossCompletion completion = detector.findCompletion(
-					ChatMessageType.GAMEMESSAGE,
-					message).get();
-				assertEquals(boss.getSubjectId(), completion.getSubjectId());
-				assertEquals(1, completion.getKillCount());
-			}
+			BossCompletion completion = detector.findCompletion(
+				ChatMessageType.GAMEMESSAGE,
+				message).get();
+			assertEquals(boss.getSubjectId(), completion.getSubjectId());
+			assertEquals(1, completion.getKillCount());
 		}
 	}
 
