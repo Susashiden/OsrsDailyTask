@@ -11,12 +11,14 @@ OSRS Daily Tasks is a RuneLite plugin designed to give players a varied, account
 
 - Generates one daily task per account and rolls it over at the configured time.
 - Supports skill XP, boss kills, Agility courses, Brimhaven Agility Arena pillar tags, and clue scroll completions.
+- Derives XP-task targets from bundled training-method rates for the player's official account type, with sourced Wiki fallbacks for skills that Wise Old Man treats as zero-time.
 - Provides Easy, Normal, and Hard task difficulties with configurable target ranges.
 - Generates boss tasks from RuneLite's supported boss hiscore entries and scales kill targets by both PvM difficulty and task difficulty.
 - Allows a maximum PvM difficulty to be selected, from Low through Endgame or Any.
 - Saves the active task and progress between sessions.
 - Displays progress in a RuneLite side panel and optional compact overlay.
 - Can notify the player when a task is completed.
+- Uses offline catalogs for XP methods and boss metadata; normal plugin use does not poll Wise Old Man, the OSRS Wiki, or live Hiscores.
 
 ## License
 This project is licensed under the BSD 2-Clause License. See [LICENSE](LICENSE).

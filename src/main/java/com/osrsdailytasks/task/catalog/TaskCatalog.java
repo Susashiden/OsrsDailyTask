@@ -1,4 +1,4 @@
-package com.osrsdailytasks.service;
+package com.osrsdailytasks.task.catalog;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +7,8 @@ import java.util.Locale;
 import javax.inject.Singleton;
 import javax.inject.Inject;
 import com.osrsdailytasks.TaskDifficulty;
+import com.osrsdailytasks.boss.catalog.HiscoreBossCatalog;
+import com.osrsdailytasks.boss.model.BossDefinition;
 import com.osrsdailytasks.model.ClueTier;
 import com.osrsdailytasks.model.TaskDefinition;
 import com.osrsdailytasks.model.TaskType;
@@ -43,8 +45,9 @@ public class TaskCatalog
 				TaskType.XP,
 				skill.name(),
 				"Gain " + skill.getName() + " XP",
-				5_000,
-				20_000));
+				// XP targets are resolved from the account-specific training-method catalog.
+				1,
+				1));
 		}
 
 		for (BossDefinition boss : bosses)

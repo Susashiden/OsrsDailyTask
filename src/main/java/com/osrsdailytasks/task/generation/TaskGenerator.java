@@ -1,4 +1,4 @@
-package com.osrsdailytasks.service;
+package com.osrsdailytasks.task.generation;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -16,6 +16,9 @@ import com.osrsdailytasks.TaskDifficulty;
 import com.osrsdailytasks.model.ActiveTask;
 import com.osrsdailytasks.model.TaskDefinition;
 import com.osrsdailytasks.model.TaskType;
+import com.osrsdailytasks.task.catalog.TaskCatalog;
+import com.osrsdailytasks.training.target.XpTargetCalculator;
+import com.osrsdailytasks.training.target.XpTargetRange;
 
 @Singleton
 public class TaskGenerator
@@ -23,31 +26,47 @@ public class TaskGenerator
 	private final List<TaskDefinition> definitions;
 	private final Random random;
 	private final Supplier<TaskDifficulty> difficultySupplier;
+	private final XpTargetCalculator xpTargetCalculator;
 
 	@Inject
-	public TaskGenerator(TaskCatalog catalog, Random random, OsrsDailyTasksConfig config)
+	public TaskGenerator(
+		TaskCatalog catalog,
+		Random random,
+		OsrsDailyTasksConfig config,
+		XpTargetCalculator xpTargetCalculator)
 	{
-		this(catalog.getDefinitions(), random, config::difficulty);
+		this(catalog.getDefinitions(), random, config::difficulty, xpTargetCalculator);
 	}
 
-	TaskGenerator(List<TaskDefinition> definitions, Random random)
+	public TaskGenerator(List<TaskDefinition> definitions, Random random)
 	{
-		this(definitions, random, () -> TaskDifficulty.NORMAL);
+		this(definitions, random, () -> TaskDifficulty.NORMAL, null);
 	}
 
-	TaskGenerator(List<TaskDefinition> definitions, Random random, TaskDifficulty difficulty)
+	public TaskGenerator(List<TaskDefinition> definitions, Random random, TaskDifficulty difficulty)
 	{
-		this(definitions, random, () -> difficulty);
+		this(definitions, random, () -> difficulty, null);
+	}
+
+	TaskGenerator(
+		List<TaskDefinition> definitions,
+		Random random,
+		TaskDifficulty difficulty,
+		XpTargetCalculator xpTargetCalculator)
+	{
+		this(definitions, random, () -> difficulty, xpTargetCalculator);
 	}
 
 	private TaskGenerator(
 		List<TaskDefinition> definitions,
 		Random random,
-		Supplier<TaskDifficulty> difficultySupplier)
+		Supplier<TaskDifficulty> difficultySupplier,
+		XpTargetCalculator xpTargetCalculator)
 	{
 		this.definitions = new ArrayList<>(Objects.requireNonNull(definitions, "definitions"));
 		this.random = Objects.requireNonNull(random, "random");
 		this.difficultySupplier = Objects.requireNonNull(difficultySupplier, "difficultySupplier");
+		this.xpTargetCalculator = xpTargetCalculator;
 	}
 
 	public ActiveTask generate(LocalDate generationDate, Predicate<TaskDefinition> eligibility)
@@ -55,11 +74,14 @@ public class TaskGenerator
 		Objects.requireNonNull(generationDate, "generationDate");
 		Objects.requireNonNull(eligibility, "eligibility");
 		TaskDifficulty difficulty = getConfiguredDifficulty();
+		boolean xpTargetsAvailable = xpTargetCalculator == null
+			|| xpTargetCalculator.isCurrentProfileSupported();
 
 		Map<TaskType, List<TaskDefinition>> eligibleByType = new EnumMap<>(TaskType.class);
 		for (TaskDefinition definition : definitions)
 		{
 			if (difficulty.isAtLeast(definition.getMinimumDifficulty())
+				&& (definition.getType() != TaskType.XP || xpTargetsAvailable)
 				&& eligibility.test(definition))
 			{
 				eligibleByType.computeIfAbsent(definition.getType(), ignored -> new ArrayList<>())
@@ -89,6 +111,8 @@ public class TaskGenerator
 		Objects.requireNonNull(taskId, "taskId");
 		Objects.requireNonNull(eligibility, "eligibility");
 		TaskDifficulty difficulty = getConfiguredDifficulty();
+		boolean xpTargetsAvailable = xpTargetCalculator == null
+			|| xpTargetCalculator.isCurrentProfileSupported();
 
 		for (TaskDefinition definition : definitions)
 		{
@@ -97,6 +121,7 @@ public class TaskGenerator
 				continue;
 			}
 			if (!difficulty.isAtLeast(definition.getMinimumDifficulty())
+				|| (definition.getType() == TaskType.XP && !xpTargetsAvailable)
 				|| !eligibility.test(definition))
 			{
 				throw new IllegalArgumentException(
@@ -121,8 +146,21 @@ public class TaskGenerator
 		TaskDifficulty targetDifficulty = selected.isScaleTargetsWithDifficulty()
 			? difficulty
 			: TaskDifficulty.NORMAL;
-		int minimumTarget = targetDifficulty.scaleTarget(selected.getMinimumTarget());
-		int maximumTarget = targetDifficulty.scaleTarget(selected.getMaximumTarget());
+		int minimumTarget;
+		int maximumTarget;
+		if (selected.getType() == TaskType.XP && xpTargetCalculator != null)
+		{
+			XpTargetRange range = xpTargetCalculator.calculateCurrent(
+				selected.getSubjectId(),
+				targetDifficulty);
+			minimumTarget = range.getMinimum();
+			maximumTarget = range.getMaximum();
+		}
+		else
+		{
+			minimumTarget = targetDifficulty.scaleTarget(selected.getMinimumTarget());
+			maximumTarget = targetDifficulty.scaleTarget(selected.getMaximumTarget());
+		}
 		int targetRange = maximumTarget - minimumTarget + 1;
 		int targetAmount = minimumTarget + random.nextInt(targetRange);
 		return ActiveTask.create(generationDate, selected, targetAmount);

@@ -1,4 +1,4 @@
-package com.osrsdailytasks.service;
+package com.osrsdailytasks.task.eligibility;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import com.osrsdailytasks.OsrsDailyTasksConfig;
 import com.osrsdailytasks.PvmDifficulty;
+import com.osrsdailytasks.boss.catalog.HiscoreBossCatalog;
 import com.osrsdailytasks.model.TaskDefinition;
 import com.osrsdailytasks.model.TaskType;
 

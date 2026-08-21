@@ -11,7 +11,7 @@ import com.osrsdailytasks.OsrsDailyTasksConfig;
 import com.osrsdailytasks.model.ActiveTask;
 import com.osrsdailytasks.model.TaskDefinition;
 import com.osrsdailytasks.service.DailyTaskService;
-import com.osrsdailytasks.service.TaskCatalog;
+import com.osrsdailytasks.task.catalog.TaskCatalog;
 import com.osrsdailytasks.tracking.TaskProgressService;
 import com.osrsdailytasks.tracking.XpBaselineInitializer;
 import net.runelite.api.Client;

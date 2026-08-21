@@ -1,6 +1,8 @@
-package com.osrsdailytasks.service;
+package com.osrsdailytasks.task.eligibility;
 
 import com.osrsdailytasks.PvmDifficulty;
+import com.osrsdailytasks.boss.catalog.HiscoreBossCatalog;
+import com.osrsdailytasks.boss.model.BossDefinition;
 import com.osrsdailytasks.model.TaskDefinition;
 import com.osrsdailytasks.model.TaskType;
 import org.junit.Test;

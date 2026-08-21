@@ -12,6 +12,7 @@ import com.osrsdailytasks.model.ActiveTask;
 import com.osrsdailytasks.model.TaskDefinition;
 import com.osrsdailytasks.model.TaskType;
 import com.osrsdailytasks.persistence.DailyTaskRepository;
+import com.osrsdailytasks.task.generation.TaskGenerator;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

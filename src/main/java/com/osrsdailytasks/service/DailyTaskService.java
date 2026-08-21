@@ -9,6 +9,9 @@ import javax.inject.Singleton;
 import com.osrsdailytasks.model.ActiveTask;
 import com.osrsdailytasks.persistence.DailyTaskRepository;
 import com.osrsdailytasks.persistence.RuneLiteDailyTaskRepository;
+import com.osrsdailytasks.task.eligibility.DefaultTaskEligibilityPolicy;
+import com.osrsdailytasks.task.eligibility.TaskEligibilityPolicy;
+import com.osrsdailytasks.task.generation.TaskGenerator;
 
 @Singleton
 public class DailyTaskService
@@ -30,7 +33,7 @@ public class DailyTaskService
 		this((DailyTaskRepository) repository, generator, eligibilityPolicy, clock);
 	}
 
-	DailyTaskService(
+	public DailyTaskService(
 		DailyTaskRepository repository,
 		TaskGenerator generator,
 		TaskEligibilityPolicy eligibilityPolicy,

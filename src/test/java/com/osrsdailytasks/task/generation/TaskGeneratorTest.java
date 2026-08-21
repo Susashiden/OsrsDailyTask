@@ -1,4 +1,4 @@
-package com.osrsdailytasks.service;
+package com.osrsdailytasks.task.generation;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -8,6 +8,9 @@ import com.osrsdailytasks.TaskDifficulty;
 import com.osrsdailytasks.model.ActiveTask;
 import com.osrsdailytasks.model.TaskDefinition;
 import com.osrsdailytasks.model.TaskType;
+import com.osrsdailytasks.training.account.EhpProfile;
+import com.osrsdailytasks.training.catalog.TrainingMethodCatalog;
+import com.osrsdailytasks.training.target.XpTargetCalculator;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -248,6 +251,59 @@ public class TaskGeneratorTest
 		catch (IllegalArgumentException expected)
 		{
 			assertEquals("Unknown task definition: missing", expected.getMessage());
+		}
+	}
+
+	@Test
+	public void productionXpTargetUsesTheSelectedProfilesTrainingMethodRate()
+	{
+		TaskDefinition magic = new TaskDefinition(
+			"xp-magic",
+			TaskType.XP,
+			"MAGIC",
+			"Gain Magic XP",
+			1,
+			1);
+		TaskGenerator generator = new TaskGenerator(
+			Collections.singletonList(magic),
+			new SequenceRandom(0, 0, 0),
+			TaskDifficulty.NORMAL,
+			new XpTargetCalculator(new TrainingMethodCatalog(), EhpProfile.MAIN));
+
+		ActiveTask task = generator.generate(TEST_DATE, ignored -> true);
+
+		assertEquals(155_250, task.getTargetAmount());
+	}
+
+	@Test
+	public void unsupportedAccountProfileFailsClosedForXpWithoutBlockingOtherCategories()
+	{
+		TaskDefinition magic = new TaskDefinition(
+			"xp-magic", TaskType.XP, "MAGIC", "Gain Magic XP", 1, 1);
+		TaskDefinition activity = new TaskDefinition(
+			"activity", TaskType.ACTIVITY, "ACTIVITY", "Complete activity", 1, 1);
+		XpTargetCalculator calculator = new XpTargetCalculator(
+			new TrainingMethodCatalog(),
+			(EhpProfile) null);
+		TaskGenerator generator = new TaskGenerator(
+			Arrays.asList(magic, activity),
+			new SequenceRandom(0, 0, 0),
+			TaskDifficulty.NORMAL,
+			calculator);
+
+		ActiveTask task = generator.generate(TEST_DATE, ignored -> true);
+
+		assertEquals("activity", task.getTaskId());
+		try
+		{
+			generator.generateSpecific(TEST_DATE, "xp-magic", ignored -> true);
+			fail("Expected XP assignment to fail closed for an unsupported account profile");
+		}
+		catch (IllegalArgumentException expected)
+		{
+			assertEquals(
+				"Selected task is not eligible at the current difficulty: xp-magic",
+				expected.getMessage());
 		}
 	}
 

@@ -1,4 +1,4 @@
-package com.osrsdailytasks.service;
+package com.osrsdailytasks.boss.catalog;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,6 +8,8 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import com.osrsdailytasks.PvmDifficulty;
+import com.osrsdailytasks.boss.difficulty.BossDifficultyClassifier;
+import com.osrsdailytasks.boss.model.BossDefinition;
 import net.runelite.client.hiscore.HiscoreSkill;
 import net.runelite.client.hiscore.HiscoreSkillType;
 

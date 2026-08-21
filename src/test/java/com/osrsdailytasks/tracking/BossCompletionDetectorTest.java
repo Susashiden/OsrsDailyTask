@@ -1,7 +1,7 @@
 package com.osrsdailytasks.tracking;
 
-import com.osrsdailytasks.service.BossDefinition;
-import com.osrsdailytasks.service.HiscoreBossCatalog;
+import com.osrsdailytasks.boss.catalog.HiscoreBossCatalog;
+import com.osrsdailytasks.boss.model.BossDefinition;
 import net.runelite.api.ChatMessageType;
 import org.junit.Test;
 

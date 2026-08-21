@@ -5,7 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import com.osrsdailytasks.service.HiscoreBossCatalog;
+import com.osrsdailytasks.boss.catalog.HiscoreBossCatalog;
 import net.runelite.api.ChatMessageType;
 import net.runelite.client.util.Text;
 

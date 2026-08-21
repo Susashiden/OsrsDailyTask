@@ -1,4 +1,4 @@
-package com.osrsdailytasks.service;
+package com.osrsdailytasks.task.eligibility;
 
 import com.osrsdailytasks.model.TaskDefinition;
 

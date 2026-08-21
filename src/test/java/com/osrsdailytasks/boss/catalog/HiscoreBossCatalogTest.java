@@ -1,7 +1,8 @@
-package com.osrsdailytasks.service;
+package com.osrsdailytasks.boss.catalog;
 
 import java.util.HashSet;
 import java.util.Set;
+import com.osrsdailytasks.boss.model.BossDefinition;
 import net.runelite.client.hiscore.HiscoreSkill;
 import net.runelite.client.hiscore.HiscoreSkillType;
 import org.junit.Test;

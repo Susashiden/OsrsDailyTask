@@ -1,4 +1,4 @@
-package com.osrsdailytasks.service;
+package com.osrsdailytasks.boss.difficulty;
 
 import java.util.Optional;
 import javax.inject.Singleton;

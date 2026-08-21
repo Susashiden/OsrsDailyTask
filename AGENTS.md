@@ -67,6 +67,15 @@
 - Clean up subscriptions, listeners, and overlays in `shutDown()`.
 - Do not mix code reformatting with feature changes in the same commit — it makes diffs unreadable for reviewers.
 
+## Package Classification
+
+- Organize classes by domain and responsibility. Do not place a class in a package merely because nearby classes depend on it.
+- Name classes according to their actual responsibility, using precise role names where appropriate.
+- Group related domain data, lookup collections, rules, calculations, integrations, and workflows into packages that describe their purpose.
+- Keep feature-specific classes beneath their feature domain when doing so creates a clear boundary.
+- A dedicated package is warranted when a responsibility is distinct or expected to grow; do not create folders that only duplicate a class-name suffix without establishing a useful boundary.
+- Mirror production package paths in the test source tree.
+
 ## Testing
 
 You cannot verify plugin behavior yourself. Even if you have screen-capture or computer-use tools available, **do not use them to interact with RuneScape** — automating game input violates Jagex's third-party client guidelines and will get the user's account banned. Only the user can confirm a plugin works in-game.

@@ -1,9 +1,10 @@
-package com.osrsdailytasks.service;
+package com.osrsdailytasks.task.catalog;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.osrsdailytasks.TaskDifficulty;
+import com.osrsdailytasks.boss.catalog.HiscoreBossCatalog;
 import com.osrsdailytasks.model.ClueTier;
 import com.osrsdailytasks.model.TaskDefinition;
 import com.osrsdailytasks.model.TaskType;

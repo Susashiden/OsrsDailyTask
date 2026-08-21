@@ -1,4 +1,4 @@
-package com.osrsdailytasks.service;
+package com.osrsdailytasks.boss.model;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -12,7 +12,7 @@ public final class BossDefinition
 	private final String title;
 	private final boolean trackerSupported;
 
-	BossDefinition(
+	public BossDefinition(
 		HiscoreSkill hiscoreSkill,
 		PvmDifficulty pvmDifficulty,
 		String title,

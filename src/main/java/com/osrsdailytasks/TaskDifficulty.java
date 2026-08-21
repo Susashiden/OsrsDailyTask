@@ -25,7 +25,21 @@ public enum TaskDifficulty
 			throw new IllegalArgumentException("target must be finite and positive");
 		}
 
-		BigDecimal scaled = BigDecimal.valueOf(target)
+		return scaleTarget(BigDecimal.valueOf(target));
+	}
+
+	public int scaleTarget(BigDecimal target)
+	{
+		if (target == null)
+		{
+			throw new NullPointerException("target");
+		}
+		if (target.compareTo(BigDecimal.ZERO) <= 0)
+		{
+			throw new IllegalArgumentException("target must be positive");
+		}
+
+		BigDecimal scaled = target
 			.multiply(BigDecimal.valueOf(multiplier))
 			.divide(BigDecimal.valueOf(divisor), 0, RoundingMode.FLOOR);
 		if (scaled.compareTo(BigDecimal.ONE) < 0)
