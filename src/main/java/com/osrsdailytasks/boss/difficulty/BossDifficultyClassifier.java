@@ -29,7 +29,6 @@ public class BossDifficultyClassifier
 			case WINTERTODT:
 			case ZALCANO:
 				return Optional.of(PvmDifficulty.LOW);
-
 			case ABYSSAL_SIRE:
 			case AMOXLIATL:
 			case ARAXXOR:
@@ -66,7 +65,6 @@ public class BossDifficultyClassifier
 			case VORKATH:
 			case ZULRAH:
 				return Optional.of(PvmDifficulty.MEDIUM);
-
 			case ALCHEMICAL_HYDRA:
 			case CHAMBERS_OF_XERIC:
 			case DUKE_SUCELLUS:
@@ -80,7 +78,6 @@ public class BossDifficultyClassifier
 			case VARDORVIS:
 			case YAMA:
 				return Optional.of(PvmDifficulty.HIGH);
-
 			case CHAMBERS_OF_XERIC_CHALLENGE_MODE:
 			case DOOM_OF_MOKHAIOTL:
 			case SOL_HEREDIT:
@@ -90,7 +87,6 @@ public class BossDifficultyClassifier
 			case PHOSANIS_NIGHTMARE:
 			case TZKAL_ZUK:
 				return Optional.of(PvmDifficulty.ENDGAME);
-
 			default:
 				return Optional.empty();
 		}
