@@ -13,6 +13,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import com.osrsdailytasks.OsrsDailyTasksConfig;
 import com.osrsdailytasks.TaskDifficulty;
+import com.osrsdailytasks.boss.target.BossTargetRange;
+import com.osrsdailytasks.boss.target.BossTargetService;
 import com.osrsdailytasks.model.ActiveTask;
 import com.osrsdailytasks.model.TaskDefinition;
 import com.osrsdailytasks.model.TaskType;
@@ -27,25 +29,32 @@ public class TaskGenerator
 	private final Random random;
 	private final Supplier<TaskDifficulty> difficultySupplier;
 	private final XpTargetCalculator xpTargetCalculator;
+	private final BossTargetService bossTargetService;
 
 	@Inject
 	public TaskGenerator(
 		TaskCatalog catalog,
 		Random random,
 		OsrsDailyTasksConfig config,
-		XpTargetCalculator xpTargetCalculator)
+		XpTargetCalculator xpTargetCalculator,
+		BossTargetService bossTargetService)
 	{
-		this(catalog.getDefinitions(), random, config::difficulty, xpTargetCalculator);
+		this(
+			catalog.getDefinitions(),
+			random,
+			config::difficulty,
+			xpTargetCalculator,
+			bossTargetService);
 	}
 
 	public TaskGenerator(List<TaskDefinition> definitions, Random random)
 	{
-		this(definitions, random, () -> TaskDifficulty.NORMAL, null);
+		this(definitions, random, () -> TaskDifficulty.NORMAL, null, null);
 	}
 
 	public TaskGenerator(List<TaskDefinition> definitions, Random random, TaskDifficulty difficulty)
 	{
-		this(definitions, random, () -> difficulty, null);
+		this(definitions, random, () -> difficulty, null, null);
 	}
 
 	TaskGenerator(
@@ -54,19 +63,36 @@ public class TaskGenerator
 		TaskDifficulty difficulty,
 		XpTargetCalculator xpTargetCalculator)
 	{
-		this(definitions, random, () -> difficulty, xpTargetCalculator);
+		this(definitions, random, () -> difficulty, xpTargetCalculator, null);
+	}
+
+	TaskGenerator(
+		List<TaskDefinition> definitions,
+		Random random,
+		TaskDifficulty difficulty,
+		XpTargetCalculator xpTargetCalculator,
+		BossTargetService bossTargetService)
+	{
+		this(
+			definitions,
+			random,
+			() -> difficulty,
+			xpTargetCalculator,
+			bossTargetService);
 	}
 
 	private TaskGenerator(
 		List<TaskDefinition> definitions,
 		Random random,
 		Supplier<TaskDifficulty> difficultySupplier,
-		XpTargetCalculator xpTargetCalculator)
+		XpTargetCalculator xpTargetCalculator,
+		BossTargetService bossTargetService)
 	{
 		this.definitions = new ArrayList<>(Objects.requireNonNull(definitions, "definitions"));
 		this.random = Objects.requireNonNull(random, "random");
 		this.difficultySupplier = Objects.requireNonNull(difficultySupplier, "difficultySupplier");
 		this.xpTargetCalculator = xpTargetCalculator;
+		this.bossTargetService = bossTargetService;
 	}
 
 	public ActiveTask generate(LocalDate generationDate, Predicate<TaskDefinition> eligibility)
@@ -76,12 +102,15 @@ public class TaskGenerator
 		TaskDifficulty difficulty = getConfiguredDifficulty();
 		boolean xpTargetsAvailable = xpTargetCalculator == null
 			|| xpTargetCalculator.isCurrentProfileSupported();
+		boolean bossTargetsAvailable = bossTargetService == null
+			|| bossTargetService.isCurrentProfileSupported();
 
 		Map<TaskType, List<TaskDefinition>> eligibleByType = new EnumMap<>(TaskType.class);
 		for (TaskDefinition definition : definitions)
 		{
 			if (difficulty.isAtLeast(definition.getMinimumDifficulty())
 				&& (definition.getType() != TaskType.XP || xpTargetsAvailable)
+				&& (definition.getType() != TaskType.BOSS || bossTargetsAvailable)
 				&& eligibility.test(definition))
 			{
 				eligibleByType.computeIfAbsent(definition.getType(), ignored -> new ArrayList<>())
@@ -113,6 +142,8 @@ public class TaskGenerator
 		TaskDifficulty difficulty = getConfiguredDifficulty();
 		boolean xpTargetsAvailable = xpTargetCalculator == null
 			|| xpTargetCalculator.isCurrentProfileSupported();
+		boolean bossTargetsAvailable = bossTargetService == null
+			|| bossTargetService.isCurrentProfileSupported();
 
 		for (TaskDefinition definition : definitions)
 		{
@@ -122,6 +153,7 @@ public class TaskGenerator
 			}
 			if (!difficulty.isAtLeast(definition.getMinimumDifficulty())
 				|| (definition.getType() == TaskType.XP && !xpTargetsAvailable)
+				|| (definition.getType() == TaskType.BOSS && !bossTargetsAvailable)
 				|| !eligibility.test(definition))
 			{
 				throw new IllegalArgumentException(
@@ -155,6 +187,14 @@ public class TaskGenerator
 				targetDifficulty);
 			minimumTarget = range.getMinimum();
 			maximumTarget = range.getMaximum();
+		}
+		else if (selected.getType() == TaskType.BOSS && bossTargetService != null)
+		{
+			BossTargetRange range = bossTargetService.calculateCurrent(
+				selected.getSubjectId(),
+				targetDifficulty);
+			int targetAmount = range.select(random);
+			return ActiveTask.create(generationDate, selected, targetAmount);
 		}
 		else
 		{

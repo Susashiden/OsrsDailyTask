@@ -5,6 +5,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 import com.osrsdailytasks.TaskDifficulty;
+import com.osrsdailytasks.boss.catalog.BossEfficiencyCatalog;
+import com.osrsdailytasks.boss.catalog.HiscoreBossCatalog;
+import com.osrsdailytasks.boss.efficiency.BossEfficiencyResolver;
+import com.osrsdailytasks.boss.target.BossTargetCalculator;
+import com.osrsdailytasks.boss.target.BossTargetService;
 import com.osrsdailytasks.model.ActiveTask;
 import com.osrsdailytasks.model.TaskDefinition;
 import com.osrsdailytasks.model.TaskType;
@@ -305,6 +310,91 @@ public class TaskGeneratorTest
 				"Selected task is not eligible at the current difficulty: xp-magic",
 				expected.getMessage());
 		}
+	}
+
+	@Test
+	public void productionBossTargetUsesTheSelectedProfilesEhbRate()
+	{
+		TaskDefinition vorkath = new TaskDefinition(
+			"boss-vorkath", TaskType.BOSS, "VORKATH", "Defeat Vorkath", 3, 6);
+		TaskGenerator mainGenerator = new TaskGenerator(
+			Collections.singletonList(vorkath),
+			new SequenceRandom(0),
+			TaskDifficulty.NORMAL,
+			null,
+			bossTargetService(EhpProfile.MAIN));
+		TaskGenerator ultimateGenerator = new TaskGenerator(
+			Collections.singletonList(vorkath),
+			new SequenceRandom(3),
+			TaskDifficulty.NORMAL,
+			null,
+			bossTargetService(EhpProfile.ULTIMATE));
+
+		ActiveTask main = mainGenerator.generateSpecific(
+			TEST_DATE, "boss-vorkath", ignored -> true);
+		ActiveTask ultimate = ultimateGenerator.generateSpecific(
+			TEST_DATE, "boss-vorkath", ignored -> true);
+
+		assertEquals(6, main.getTargetAmount());
+		assertEquals(8, ultimate.getTargetAmount());
+	}
+
+	@Test
+	public void productionBossTargetUsesTheReviewedFallbackRange()
+	{
+		TaskDefinition tempoross = new TaskDefinition(
+			"boss-tempoross", TaskType.BOSS, "TEMPOROSS", "Complete Tempoross", 4, 8);
+		TaskGenerator generator = new TaskGenerator(
+			Collections.singletonList(tempoross),
+			new SequenceRandom(8),
+			TaskDifficulty.HARD,
+			null,
+			bossTargetService(EhpProfile.MAIN));
+
+		ActiveTask task = generator.generateSpecific(
+			TEST_DATE, "boss-tempoross", ignored -> true);
+
+		assertEquals(16, task.getTargetAmount());
+	}
+
+	@Test
+	public void unsupportedAccountProfileFailsClosedForBossWithoutBlockingOtherCategories()
+	{
+		TaskDefinition boss = new TaskDefinition(
+			"boss-vorkath", TaskType.BOSS, "VORKATH", "Defeat Vorkath", 3, 6);
+		TaskDefinition activity = new TaskDefinition(
+			"activity", TaskType.ACTIVITY, "ACTIVITY", "Complete activity", 1, 1);
+		TaskGenerator generator = new TaskGenerator(
+			Arrays.asList(boss, activity),
+			new SequenceRandom(0, 0, 0),
+			TaskDifficulty.NORMAL,
+			null,
+			bossTargetService(null));
+
+		ActiveTask task = generator.generate(TEST_DATE, ignored -> true);
+
+		assertEquals("activity", task.getTaskId());
+		try
+		{
+			generator.generateSpecific(TEST_DATE, "boss-vorkath", ignored -> true);
+			fail("Expected boss assignment to fail closed for an unsupported account profile");
+		}
+		catch (IllegalArgumentException expected)
+		{
+			assertEquals(
+				"Selected task is not eligible at the current difficulty: boss-vorkath",
+				expected.getMessage());
+		}
+	}
+
+	private static BossTargetService bossTargetService(EhpProfile profile)
+	{
+		HiscoreBossCatalog bossCatalog = new HiscoreBossCatalog();
+		return new BossTargetService(
+			bossCatalog,
+			new BossEfficiencyResolver(new BossEfficiencyCatalog()),
+			new BossTargetCalculator(),
+			profile);
 	}
 
 	private static TaskDefinition definition(String id, TaskType type, double minimum, double maximum)
